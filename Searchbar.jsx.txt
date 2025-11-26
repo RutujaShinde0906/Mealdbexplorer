@@ -1,0 +1,52 @@
+@'
+import React from "react"
+
+function parseIngredients(meal) {
+  const items = []
+  for (let i = 1; i <= 20; i++) {
+    const ing = meal[`strIngredient${i}`]
+    const measure = meal[`strMeasure${i}`]
+    if (ing && ing.trim()) items.push(`${ing}${measure ? " — " + measure : ""}`)
+  }
+  return items
+}
+export default function Meals({ meal, onBack }) {
+  const ingredients = parseIngredients(meal)
+  const youtubeId = meal.strYoutube ? new URL(meal.strYoutube).searchParams.get("v") : null
+
+  return (
+    <div className="meal-details">
+      <button className="back-btn" onClick={onBack}>← Back</button>
+      <h2>{meal.strMeal}</h2>
+      <div className="details-grid">
+        <div className="left">
+          <img src={meal.strMealThumb} alt={meal.strMeal} />
+          <h4>Ingredients</h4>
+          <ul>
+            {ingredients.map((it, idx) => <li key={idx}>{it}</li>)}
+          </ul>
+        </div>
+        <div className="right">
+          <h4>Instructions</h4>
+          <p style={{ whiteSpace:"pre-wrap" }}>{meal.strInstructions}</p>
+
+          {youtubeId && (
+            <div className="video">
+              <h4>Video</h4>
+              <iframe
+                title="YouTube"
+                width="100%"
+                height="315"
+                src={`https://www.youtube.com/embed/${youtubeId}`}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+'@ | Set-Content "$frontend\src\components\Meals.jsx" -Encoding UTF8

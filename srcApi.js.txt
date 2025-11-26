@@ -1,0 +1,20 @@
+@'
+import axios from "axios";
+
+const client = axios.create({ baseURL: "/api" });
+
+export const searchMeals = (q) =>
+  client.get(`/search?q=${encodeURIComponent(q)}`).then(r => r.data);
+
+export const getCategories = () =>
+  client.get("/categories").then(r => r.data);
+
+export const getCategoryMeals = (category) =>
+  client.get(`/category/${encodeURIComponent(category)}`).then(r => r.data);
+
+export const getRandomMeal = () =>
+  client.get("/random").then(r => r.data);
+
+export const getMealById = (id) =>
+  client.get(`/meal/${encodeURIComponent(id)}`).then(r => r.data);
+'@ | Set-Content "$frontend\src\api.js" -Encoding UTF8

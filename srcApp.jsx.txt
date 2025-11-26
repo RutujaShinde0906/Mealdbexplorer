@@ -1,0 +1,96 @@
+@'
+import React, { useEffect, useState } from "react"
+import { searchMeals, getCategories, getCategoryMeals, getRandomMeal, getMealById } from "./api"
+import SearchBar from "./components/SearchBar"
+import CategoryList from "./components/CategoryList"
+import MealCard from "./components/MealCard"
+import MealDetails from "./components/MealDetails"
+
+export default function App() {
+  const [query, setQuery] = useState("")
+  const [meals, setMeals] = useState([])
+  const [categories, setCategories] = useState([])
+  const [selectedMeal, setSelectedMeal] = useState(null)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    getCategories().then(data => setCategories(data.categories || [])).catch(console.error)
+  }, [])
+
+  async function doSearch(q) {
+    setLoading(true)
+    try {
+      const data = await searchMeals(q)
+      setMeals(data.meals || [])
+    } catch (e) { console.error(e) } finally { setLoading(false) }
+  }
+
+  async function openCategory(cat) {
+    setLoading(true)
+    try {
+      const data = await getCategoryMeals(cat)
+      setMeals(data.meals || [])
+    } catch (e) { console.error(e) } finally { setLoading(false) }
+  }
+
+  async function openRandom() {
+    setLoading(true)
+    try {
+      const data = await getRandomMeal()
+      const meal = (data.meals || [])[0]
+      if (meal) setSelectedMeal(meal)
+    } catch (e) { console.error(e) } finally { setLoading(false) }
+  }
+
+  async function openMealDetails(id) {
+    setLoading(true)
+    try {
+      const data = await getMealById(id)
+      const meal = (data.meals || [])[0]
+      if (meal) setSelectedMeal(meal)
+    } catch (e) { console.error(e) } finally { setLoading(false) }
+  }
+
+  return (
+    <div className="app-container">
+      <header className="app-header">
+        <h1>TheMealDB Explorer</h1>
+        <div className="header-actions">
+          <button className="random-btn" onClick={openRandom}>I'm feeling hungry</button>
+        </div>
+      </header>
+
+      <main>
+        <SearchBar onSearch={(q) => { setQuery(q); doSearch(q) }} />
+
+        <section className="layout">
+          <aside className="sidebar">
+            <h3>Categories</h3>
+            <CategoryList categories={categories} onSelect={openCategory} />
+          </aside>
+
+          <section className="content">
+            {loading && <div className="loading">Loading…</div>}
+            {!selectedMeal && (
+              <div className="meals-grid">
+                {meals.length === 0 && <p>Search for meals or pick a category.</p>}
+                {meals.map(m => (
+                  <MealCard key={m.idMeal} meal={m} onOpen={() => openMealDetails(m.idMeal)} />
+                ))}
+              </div>
+            )}
+
+            {selectedMeal && (
+              <MealDetails meal={selectedMeal} onBack={() => setSelectedMeal(null)} />
+            )}
+          </section>
+        </section>
+      </main>
+
+      <footer className="app-footer">
+        <small>Built with TheMealDB public API (test key 1)</small>
+      </footer>
+    </div>
+  )
+}
+'@ | Set-Content "$frontend\src\App.jsx" -Encoding UTF8
